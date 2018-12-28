@@ -1,27 +1,30 @@
+#some comment added by AM 12/28
 from vpython import *
 import math
 n_oil = 1.7
 n_water = 1.33
+y_oil = 4
+y_water = 2
 
 class light:
 	def __init__(self,wl,pos,v):  # wl = wavelength 
 		self.wl = wl
 		self.v = v
 		self.pos = pos
-		self.length = 0
+		self.length = 0  # path of the light
 		self.phase = 0
-		self.condition = 0
+		self.condition = 0 # 0=air 1=oil 2=water 
 
 	def refraction(self,n1,n2):
 		in_sintheta = self.v.x/mag(self.v)
 		if n1*in_sintheta>=n2:
-			self.v.y = -self.v.y
-			print("total reflection")
+			self.v.y = -self.v.yj
+			print("beam"+str(self.condition)+"total reflection")
 		else:
 			out_sintheta = in_sintheta*(n1/n2)
 			new_v = self.v.mag*(n1/n2)
 			self.v = vec(new_v*math.sqrt(1-out_sintheta**2),-new_v*out_sintheta,0)
-			print("refraction")
+			print("beam"+str(self.condition)+"refraction")
 
 	def reflection(self):
 		self.v.y = -self.v.y
@@ -40,7 +43,7 @@ count = 0
 
 while True:
 	beam.pos += beam.v*dt
-	beam.length += mag(beam.v)*dt
+	beam.length += mag(beam.v)*dt ##光徑這樣寫很危險
 	try:
 		re_beam.pos += re_beam.v*dt
 		re_beam.length += mag(re_beam.v)*dt
