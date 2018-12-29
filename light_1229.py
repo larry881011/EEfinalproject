@@ -1,33 +1,42 @@
-#some comment added by AM 12/28
+# AM 12/29 (light is as a linear function)
 from vpython import *
 import math
-n_oil = 1.7
-n_water = 1.33
+n = [0, 1.7, 1.33] 						# refraction index (air, oil, water)
 y_oil = 4
 y_water = 2
 
 class light:
-	def __init__(self,wl,pos,v):  # wl = wavelength 
-		self.wl = wl
-		self.v = v
-		self.pos = pos
-		self.length = 0  # path of the light
-		self.phase = 0
-		self.condition = 0 # 0=air 1=oil 2=water 
+	def __init__(self,wl,origin,direction):   
+		self.wl = wl 					# wavelength
+		self.source = origin			# light source
+		self.direction = direction		# light beam direction
 
-	def refraction(self,n1,n2):
-		in_sintheta = self.v.x/mag(self.v)
-		if n1*in_sintheta>=n2:
-			self.v.y = -self.v.yj
-			print("beam"+str(self.condition)+"total reflection")
-		else:
-			out_sintheta = in_sintheta*(n1/n2)
-			new_v = self.v.mag*(n1/n2)
-			self.v = vec(new_v*math.sqrt(1-out_sintheta**2),-new_v*out_sintheta,0)
-			print("beam"+str(self.condition)+"refraction")
+		self.amplitude = 1				# amplitude (strength)
+		self.length = 0  				# length of light path
+		self.phase = 0					# BJ4
+		self.medium = 0 				# medium, 0=air 1=oil 2=water
 
-	def reflection(self):
-		self.v.y = -self.v.y
+class interface:
+	def __init__(self,y,a,b):			# a,b = index of medium
+		self.y = y 						# interface height
+		self.n_up = n[a]				# medium 1 refraction index
+		self.n_down = n[b]				# medium 2 refraction index
+
+##-----目前先做這樣-----##
+
+def refraction(self,n1,n2):
+	in_sintheta = self.v.x/mag(self.v)
+	if n1*in_sintheta>=n2:
+		self.v.y = -self.v.yj
+		print("beam"+str(self.condition)+"total reflection")
+	else:
+		out_sintheta = in_sintheta*(n1/n2)
+		new_v = self.v.mag*(n1/n2)
+		self.v = vec(new_v*math.sqrt(1-out_sintheta**2),-new_v*out_sintheta,0)
+		print("beam"+str(self.condition)+"refraction")
+
+def reflection(self):
+	self.v.y = -self.v.y
 
 def touchsensor(pos):
 	if pos.x>=5 and pos.x>=7 and pos.y>=5 and pos.y<=7 and pos.x+pos.y>12:
