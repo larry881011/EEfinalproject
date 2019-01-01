@@ -60,7 +60,6 @@ def refraction(light,interface):
 		R = ((n1*cos_theta_out-n2*cos_theta_in)/(n1*cos_theta_out+n2*cos_theta_in))**2  # reflectance(ratio of reflection)
 		T = 1 - R   # transmitance(ratio of refraction)
 		light.amplitude *= T
-		
 		if reflection:
 			wl = light.wl
 			re_beam = light(wl,o,vec(light.direction.x,-light.direction.y,0),1/2*wl)
