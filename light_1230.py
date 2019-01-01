@@ -80,7 +80,7 @@ if __name__ =="__main__":
 	re_beams = []
 
 	air_oil = interface(y_oil,0)
-	oil_water = interface(y_water,1)
+	oil_water = interface(y_water,1 )
 	
 	for i in range(1):
 		for j in range(1):
