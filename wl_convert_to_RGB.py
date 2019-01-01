@@ -1,3 +1,5 @@
+
+#此單位為奈米
 def wavelength_to_rgb(wavelength, gamma=0.8):
 
     wavelength = float(wavelength)
