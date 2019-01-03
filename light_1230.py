@@ -9,7 +9,7 @@ class light:
 	def __init__(self,wl,origin,direction,length=0):   
 		self.wl = wl 					# wavelength
 		self.source = origin			# light source
-		self.direction = direction		# light beam direction
+		self.direction = direction		# light beam direction 
 
 		self.amplitude = 1				# amplitude (strength)
 		self.length = length  			# length of light path
@@ -23,62 +23,64 @@ class interface:
 		self.no = number				# number of interface, air-oil=0 oil-water=1
 
 ##-----目前先做這樣-----##
-def get_length_and_origin(light,interface):
+def get_length_and_origin(light,interface):   # the function to get how far does light goes and the new origin
 	
-	delta_y = abs(light.source.y-interface.y)
-	times = delta_y/abs(light.direction.y)
-	new_origin = light.source + light.direction*times
-	length = mag(light.direction*times)
+	delta_y = abs(light.source.y-interface.y) # count delta y from old origin to new origin
+	times = delta_y/abs(light.direction.y)    
+	new_origin = light.source + light.direction*times # 算 delta y 是 light.direction 的幾倍 
+	length = mag(light.direction*times)  # count length
 	return length, new_origin
 	
 
-def refraction(light,interface):
-	reflection = False
-	sin_theta_in = light.direction.x/mag(light.direction)
-	cos_theta_in = math.sqrt(1-sin_theta_in**2)
-	n1 = n[light.medium]
+def refraction(light,interface,reflected):  # function to refraction 
+	             
+	sin_theta_in = light.direction.x/mag(light.direction) #算入射角的sin值
+	cos_theta_in = math.sqrt(1-sin_theta_in**2)			  #算入射角的cos值
+	n1 = n[light.medium]								  #決定n1
 	
-	if light.medium == interface.no:
+	#決定n2
+	if light.direction.y<= 0:	#如果光是往下射
 		n2 = n[light.medium+1]
-		reflection = True		
+		light.medium += 1
+				
 	else:
 		n2 = n[interface.no]
+		light.medium -= 1
+
 		
 	print(n1,n2)
-	l,o = get_length_and_origin(light,interface)
-	light.length += l
-	light.source = o
+	l,o = get_length_and_origin(light,interface) 
+	light.length += l 		#更新光程
+	light.source = o 		#更新原點
 	
-	if n1*sin_theta_in>=n2:
-		light.direction.y = -light.direction.y
-		print(light.direction)
+	
+	sin_theta_out = sin_theta_in*(n1/n2)
+	cos_theta_out = math.sqrt(1-sin_theta_out**2)
+	#by Fresnel equations
+	R = ((n1*cos_theta_out-n2*cos_theta_in)/(n1*cos_theta_out+n2*cos_theta_in))**2  # reflectance(ratio of reflection)
+	T = 1 - R   # transmitance(ratio of refraction)
+	light.amplitude *= T
+	if not reflected:
 
-	else:
-		sin_theta_out = sin_theta_in*(n1/n2)
-		cos_theta_out = math.sqrt(1-sin_theta_out**2)
-		#by Fresnel equations
-		R = ((n1*cos_theta_out-n2*cos_theta_in)/(n1*cos_theta_out+n2*cos_theta_in))**2  # reflectance(ratio of reflection)
-		T = 1 - R   # transmitance(ratio of refraction)
-		light.amplitude *= T
-		
-		if reflection:
-			wl = light.wl
-			re_beam = light(wl,o,vec(light.direction.x,-light.direction.y,0),1/2*wl)
-			re_beam.amplitude = R
-			re_beams.append(re_beam)
 		
 
-		light.direction = vec(sin_theta_out,-cos_theta_out,0)
-		light.medium += 1
 
-		print(light.direction)
+		
+
+	light.direction = vec(sin_theta_out,-cos_theta_out,0)
+	light.medium += 1
+
+	print(light.direction)
+
+def reflection(light,interface):
+	light.direction.y = - light.direction.y
+
+
+
 
 
 
 if __name__ =="__main__":
-
-	beams = []
-	re_beams = []
 
 	air_oil = interface(y_oil,0)
 	oil_water = interface(y_water,1)
