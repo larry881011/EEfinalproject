@@ -91,8 +91,8 @@ def refraction_or_reflection(light1,interface,case):
 		
 if __name__ =="__main__":
 	a = graph(width = 1200, align = 'left', ymin=0)
-	g = gcurve(color = color.blue)
-	f = gcurve(color = color.red)
+	g = gdots(color = color.blue)
+	f = gdots(color = color.red)
 
 
 	beams = []
@@ -101,11 +101,11 @@ if __name__ =="__main__":
 	air_oil = interface(y_oil,0)
 	oil_water = interface(y_water,1)
 	
-	precise = 150
+	precise = 10000
 	for i in range(precise):
-		for j in range(precise):
+		for j in range(1):
 			
-			beam = light(400*10**(-7),vec(-5+0.01/precise*i,5+0/precise*i,0/precise*j),vec(cos(pi/4+pi/360/3*j/precise),-sin(pi/4+pi/360/3*j/precise),0))
+			beam = light(400*10**(-7),vec(-5+0.01/precise*i,5+0.01/precise*i,0/precise*j),vec(cos(pi/4),-sin(pi/4),0))
 			beams.append(beam)
 	
 	for beam in beams:
@@ -134,12 +134,33 @@ if __name__ =="__main__":
 	for b in beams:
 		#all_beams.append(b)
 		g.plot(pos=(b.source.x,b.phase))
-	#for b in re_beams:
+	for b in re_beams:
 		#all_beams.append(b)
+		f.plot(pos=(b.source.x,b.phase))
 
+	light_sum = np.zeros((10,2))	#light_sum [area, (0>>amplitude / 1>>phase) ]
+	for b in re_beams:
+		beams.append(b)
 
+	for b in beams:
+		area_index = math.floor((b.source.x + 0.1) / 0.02 * 10)
+		if 0 <= area_index <= 9:
+			#sum_amplitude = sqrt((Acos(a)+Bcos(b))**2 + (Asin(a)+Bsin(b))**2)
+			sum_amplitude = sqrt(\
+			(b.amplitude*cos(b.phase)+light_sum[area_index,0]*cos(light_sum[area_index,1]))**2\
+			+ (b.amplitude*sin(b.phase)+light_sum[area_index,0]*sin(light_sum[area_index,1]))**2)
 
+			#sum_phase = atan([Asin(a)+Bsin(b)]/[Acos(a)+Bcos(b)])
+			sum_phase = atan(\
+			(b.amplitude*sin(b.phase)+light_sum[area_index,0]*sin(light_sum[area_index,1]))/\
+			(b.amplitude*cos(b.phase)+light_sum[area_index,0]*cos(light_sum[area_index,1]))\
+			)
 
+			light_sum[area_index,0] = sum_amplitude
+			light_sum[area_index,1] = sum_phase
+
+	for i in range(10):
+		print(light_sum[i,0])
 
 
 
