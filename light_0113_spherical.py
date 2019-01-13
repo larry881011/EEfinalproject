@@ -2,7 +2,7 @@ from vpython import *
 import math
 import numpy as np
 
-n = [1,1.5,1.33]							# refraction index (air, oil, water)
+n = [1,1.5,1]							# refraction index (air, oil, water)
 class light:
 	def __init__(self,wl,origin,direction,length=0,amplitude=1):   
 		self.wl = wl 					# wavelength 				( m )
@@ -26,8 +26,11 @@ def get_length_and_origin(light,interface):
 	A = mag2(light.direction)
 	B = dot(light.direction,light.source-interface.center)
 	C = mag2(light.source-interface.center)-interface.r**2
-	r1 = ( -B - sqrt(B*B - A*C) ) / A
-	r2 = ( -B + sqrt(B*B - A*C) ) / A
+	try:
+		r1 = ( -B - sqrt(B*B - A*C) ) / A
+		r2 = ( -B + sqrt(B*B - A*C) ) / A
+	except:
+		return -1,vec(10,10,10)
 	if r1<0:
 		t = r2
 	else:
@@ -62,11 +65,17 @@ def refraction_or_reflection(light1,interface,case):
 	#print(o)
 	
 	sin_theta_out = sin_theta_in*(n1/n2)
-	cos_theta_out = sqrt(1-sin_theta_out**2)
-
-	#by Fresnel equations
-	R = ((n1*cos_theta_out-n2*cos_theta_in)/(n1*cos_theta_out+n2*cos_theta_in))**2  # reflectance(ratio of reflection)
-	T = 1 - R   # transmitance(ratio of refraction)
+	try:
+		cos_theta_out = sqrt(1-sin_theta_out**2)
+	except:
+		sin_theta_out = 0
+		cos_theta_out = 0
+		R = 0
+		T = 0
+	else:
+		#by Fresnel equations
+		R = ((n1*cos_theta_out-n2*cos_theta_in)/(n1*cos_theta_out+n2*cos_theta_in))**2  # reflectance(ratio of reflection)
+		T = 1 - R   # transmitance(ratio of refraction)
 
 	if dot(light1.direction,NormVec)<0:
 		direction_out = NormVec.rotate(angle = (pi-asin(sin_theta_out)),axis = cross(NormVec,light1.direction))
@@ -75,6 +84,8 @@ def refraction_or_reflection(light1,interface,case):
 		direction_out = NormVec.rotate(angle = asin(sin_theta_out), axis = cross(NormVec,light1.direction))
 		reflection_direction = light1.direction.rotate(angle=(pi-2*asin(sin_theta_in)),axis=cross(NormVec,light1.direction))
 
+	if l == -1:
+		R,T = 0,0
 	#reflection + refraction
 	if case == 0:
 		if n2>n1:
@@ -98,22 +109,20 @@ def refraction_or_reflection(light1,interface,case):
 		light1.direction = direction_out
 		light1.amplitude *= T**0.5
 		light1.medium -= 1
-
-
 		
 if __name__ =="__main__":
 	a = graph(width = 600,height = 600, align = 'left')
 
 ##-------- VARIABLE DEFINITION --------##
 # INTERFACE
-	Xoil, Yoil, Zoil = 0,-300,0				# center of oil shell
-	Roil = sqrt(300**2 + 1**2)					# radius of oil shell
+	Xoil, Yoil, Zoil = 0,0,0				# center of oil shell
+	Roil = sqrt(0.5**2 + 0**2)					# radius of oil shell
 
-	Xwater, Ywater, Zwater = 0,-10000,0		# center of water shell
-	Rwater = 10000							# radius of water shell
+	Xwater, Ywater, Zwater = 0,0,0		# center of water shell
+	Rwater = 0.49999							# radius of water shell
 
 # LIGHT
-	precise = 10000*9			# number of light beams
+	precise = 10000/4			# number of light beams
 	wavelength = [450,540,680] 	# blue, green, red
 	source_x_range = 0
 	source_y_range = 0
@@ -160,10 +169,11 @@ if __name__ =="__main__":
 				area_index_x = floor((beams[i].source.x-Xmin)/Xrange*area_divide)
 				area_index_z = floor((beams[i].source.z-Zmin)/Zrange*area_divide)
 
-				sum_amplitude = sqrt(beams[i].amplitude**2 + re_beams[i].amplitude**2 + 2*beams[i].amplitude*re_beams[i].amplitude*cos(beams[i].phase - re_beams[i].phase))  
+				if 0 <= area_index_x < area_divide and 0 <= area_index_z < area_divide:
+					sum_amplitude = sqrt(beams[i].amplitude**2 + re_beams[i].amplitude**2 + 2*beams[i].amplitude*re_beams[i].amplitude*cos(beams[i].phase - re_beams[i].phase))  
 
-				light_sum[area_divide*area_index_z + area_index_x,k] += sum_amplitude**2
-				light_sum[area_divide*area_index_z + area_index_x,3] += 1
+					light_sum[area_divide*area_index_z + area_index_x,k] += sum_amplitude**2
+					light_sum[area_divide*area_index_z + area_index_x,3] += 1
 
 ## SHOW ON SCREEN
 
@@ -173,10 +183,12 @@ if __name__ =="__main__":
 			light_sum[i,1] = light_sum[i,1] * 3 / light_sum [i,3]
 			light_sum[i,2] = light_sum[i,2] * 3 / light_sum [i,3]
 
-		d = gdots(color = 20*vec(light_sum[i,2],light_sum[i,1],light_sum[i,0]))
+		d = gdots(color = vec(light_sum[i,2],light_sum[i,1],light_sum[i,0]))
 		if (light_sum[i,3]!=0) :
+			d.opacity = (light_sum[i,0]+light_sum[i,1]+light_sum[i,2]) / 12
 			d.plot(Xmin+Xrange*(i % area_divide)/area_divide,  Zmin+Zrange*floor(i/area_divide)/area_divide)			
 
+		print (light_sum[i,1])
 	'''
 	for i in range(area_divide):
 		blue.plot(i,all_light_sum[0][i,0])
