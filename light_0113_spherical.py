@@ -119,15 +119,15 @@ if __name__ =="__main__":
 	Roil = sqrt(0.5**2 + 0**2)					# radius of oil shell
 
 	Xwater, Ywater, Zwater = 0,0,0		# center of water shell
-	Rwater = 0.49999							# radius of water shell
+	Rwater = 0.4999							# radius of water shell
 
 # LIGHT
-	precise = 10000/4			# number of light beams
+	precise = 10000			# number of light beams
 	wavelength = [450,540,680] 	# blue, green, red
 	source_x_range = 0
 	source_y_range = 0
 	axis_x_range = 5
-	area_divide = 500
+	area_divide = 50
 
 	Xmax = 1
 	Xmin = -1
@@ -185,7 +185,8 @@ if __name__ =="__main__":
 
 		d = gdots(color = vec(light_sum[i,2],light_sum[i,1],light_sum[i,0]))
 		if (light_sum[i,3]!=0) :
-			d.opacity = (light_sum[i,0]+light_sum[i,1]+light_sum[i,2]) / 12
+			opacity = 100*(light_sum[i,0]+light_sum[i,1]+light_sum[i,2]) / 12
+			d.color = vec(1,1,1) *(1-opacity) + d.color * opacity
 			d.plot(Xmin+Xrange*(i % area_divide)/area_divide,  Zmin+Zrange*floor(i/area_divide)/area_divide)			
 
 		print (light_sum[i,1])
