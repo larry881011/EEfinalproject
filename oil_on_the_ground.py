@@ -2,7 +2,7 @@ from vpython import *
 import math
 import numpy as np
 
-n = [1,1.5,1]							# refraction index (air, oil, water)
+n = [1,1.5,1.33]							# refraction index (air, oil, water)
 class light:
 	def __init__(self,wl,origin,direction,length=0,amplitude=1):   
 		self.wl = wl 					# wavelength 				( m )
@@ -115,19 +115,19 @@ if __name__ =="__main__":
 
 ##-------- VARIABLE DEFINITION --------##
 # INTERFACE
-	Xoil, Yoil, Zoil = 0,0,0				# center of oil shell
-	Roil = sqrt(0.5**2 + 0**2)					# radius of oil shell
+	Xoil, Yoil, Zoil = 0,-300,0				# center of oil shell
+	Roil = sqrt(300**2 + 1**2)					# radius of oil shell
 
-	Xwater, Ywater, Zwater = 0,0,0		# center of water shell
-	Rwater = 0.4999							# radius of water shell
+	Xwater, Ywater, Zwater = 0,-10000,0		# center of water shell
+	Rwater = 10000							# radius of water shell
 
 # LIGHT
-	precise = 10000			# number of light beams
+	precise = 10000*9			# number of light beams
 	wavelength = [450,540,680] 	# blue, green, red
 	source_x_range = 0
 	source_y_range = 0
 	axis_x_range = 5
-	area_divide = 50
+	area_divide = 500
 
 	Xmax = 1
 	Xmin = -1
@@ -183,16 +183,7 @@ if __name__ =="__main__":
 			light_sum[i,1] = light_sum[i,1] * 3 / light_sum [i,3]
 			light_sum[i,2] = light_sum[i,2] * 3 / light_sum [i,3]
 
-		d = gdots(color = vec(light_sum[i,2],light_sum[i,1],light_sum[i,0]))
+		d = gdots(color = 20*vec(light_sum[i,2],light_sum[i,1],light_sum[i,0]))
 		if (light_sum[i,3]!=0) :
-			opacity = 100*(light_sum[i,0]+light_sum[i,1]+light_sum[i,2]) / 12
-			d.color = vec(1,1,1) *(1-opacity) + d.color * opacity
-			d.plot(Xmin+Xrange*(i % area_divide)/area_divide,  Zmin+Zrange*floor(i/area_divide)/area_divide)			
-
-		print (light_sum[i,1])
-	'''
-	for i in range(area_divide):
-		blue.plot(i,all_light_sum[0][i,0])
-		red.plot(i,all_light_sum[2][i,0])
-		green.plot(i,all_light_sum[1][i,0])
-	'''
+			
+			d.plot(Xmin+Xrange*(i % area_divide)/area_divide,  Zmin+Zrange*floor(i/area_divide)/area_divide)
