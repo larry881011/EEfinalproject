@@ -1,6 +1,10 @@
-# EEfinalproject
+# 普物專題-油膜干涉
 
+### resource
 
+[youtube影片](https://youtu.be/A3K7XHUOHMI)
+
+[說明簡報](https://drive.google.com/file/d/14wsqOPx-TOS5ZKuPaTnXycDCJfJvfCcl/view?usp=sharing)
 
 ### plane 
 	
